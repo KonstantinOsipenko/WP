@@ -1,0 +1,38 @@
+<?php function posts_by_year($slug = '', $date_format = '') {
+    if ( empty( $slug ) ) {
+        return false;
+    }
+    if ( empty( $date_format ) ) {
+        $date_format = 'M Y';
+    }
+    // array to use for results
+
+    $years = array();
+    // get posts from WP
+    $posts = get_posts([
+        'numberposts' => -1,
+        'orderby' => 'post_date',
+        'order' => 'DESC',
+        'post_type' => $slug,
+        'post_status' => 'publish'
+    ]);
+
+    // loop through posts, populating $years arrays
+    foreach($posts as $post) {
+        $years[date($date_format, strtotime($post->post_date))][] = $post;
+    }
+    // reverse sort by year
+    krsort($years);
+
+    return $years;
+}
+?>
+// call our function with two args 'slug post type' and 'date format'
+<?php foreach(posts_by_year('slug post type', 'Y') as $year => $posts) : ?>
+      <div class="year-block">
+          <h2 class="current-year"><?php echo $year; ?></h2>
+      </div>
+      <?php foreach($posts as $post) : ?>
+          <?php get_template_part( 'parts/loop', 'post' ); // Post item ?>
+      <?php endforeach; ?>
+<?php endforeach; ?>
